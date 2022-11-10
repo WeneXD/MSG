@@ -38,8 +38,8 @@ def post_msg(roomID:str, token:str, msg:str, pw:str | None=None):
     return r.post_msg(roomID,pw,token,msg)
 
 @app.get("/get_msg/")
-def get_msg(roomID:str, pw:str | None=None):
-    return r.get_msg(roomID,pw)
+def get_msg(roomID:str, token:str, pw:str | None=None):
+    return r.get_msg(roomID,pw,token)
 
 if __name__=="__main__":
     import uvicorn
