@@ -6,7 +6,7 @@ import time as t
 ip="localhost"
 port="8000"
 addr=f'http://{ip}:{port}'
-token=""
+token="mo"
 
 class mainFrame(tk.Tk):
     def __init__(self):
@@ -116,8 +116,10 @@ class StartPage(tk.Frame):
         print(meow)
         if 'err' in meow:
             self.alert_label.config(text=f"Error: {meow['err']}")
-        else:
-            self.alert_label.config(text="Successfully joined")
+            return
+        self.alert_label.config(text="Successfully joined")
+        token=meow['token']
+        
 
 class Room(tk.Frame):
     def __init__(self,parent,controller):
