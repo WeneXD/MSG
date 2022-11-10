@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 import re
 import random as rd
-import b64
+import base64
 import hashlib as hlib
 rd.seed()
 
@@ -78,13 +78,14 @@ def make_room(Name,Pw):
     if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/30)"}
     if Pw is not None:
         if len(Pw)!=len(re.sub(r"[^a-zA-Z0-9\-\_\.]","",Pw)): return {"out":False,"err":"Pass contains invalid characters"} #Check for illegal symbols in room password
+        Pw=enc_sha256(Pw) #Sha256 Encode the password
     if room:
         for id,rm in room.items():
             if int(id)==cnt:cnt+=1 #If room with count ID exists increase count's value.
             if rm.name==Name: #Also check if a room with the same name already exists.
                 return {"out":False,"err":"Room with the name already exists"}
 
-    newRoom=Room(name=Name,pw=enc_sha256(Pw),users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
+    newRoom=Room(name=Name,pw=Pw,users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
     room[str(cnt)]=newRoom #Add newRoom to the room dict.
     return {"out":True,"roomID":cnt,"name":Name} #Return a positive outcome, roomID, room name.
 
@@ -173,7 +174,11 @@ def get_msg(rID,pw,token):
 ###  OTHER
 def generate_token():
     rd.seed()
-    return enc_sha256(b64.b64("enc",str(rd.randint(100000,10000000))))
+    return enc_sha256(b64("enc",str(rd.randint(100000,10000000))))
+
+def b64(x,y):
+    if x=="enc": mBytes=y.encode("ascii"); b64Bytes=base64.b64encode(mBytes); return b64Bytes.decode("ascii")
+    elif x=="dec": b64Bytes=y.encode("ascii"); mBytes=base64.b64decode(b64Bytes); return mBytes.decode("ascii")
 
 #https://medium.com/@dwernychukjosh/sha256-encryption-with-python-bf216db497f9
 def enc_sha256(hash_string):
