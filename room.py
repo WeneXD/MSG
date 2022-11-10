@@ -2,6 +2,7 @@ from pydantic import BaseModel
 import re
 import random as rd
 import b64
+import hashlib as hlib
 rd.seed()
 
 room={}
@@ -73,7 +74,8 @@ def get_rooms():
 
 def make_room(Name,Pw):
     cnt=1
-    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in room name
+    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in room name
+    if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/30)"}
     if Pw is not None:
         if len(Pw)!=len(re.sub(r"[^a-zA-Z0-9\-\_\.]","",Pw)): return {"out":False,"err":"Pass contains invalid characters"} #Check for illegal symbols in room password
     if room:
@@ -82,7 +84,7 @@ def make_room(Name,Pw):
             if rm.name==Name: #Also check if a room with the same name already exists.
                 return {"out":False,"err":"Room with the name already exists"}
 
-    newRoom=Room(name=Name,pw=Pw,users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
+    newRoom=Room(name=Name,pw=enc_sha256(Pw),users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
     room[str(cnt)]=newRoom #Add newRoom to the room dict.
     return {"out":True,"roomID":cnt,"name":Name} #Return a positive outcome, roomID, room name.
 
@@ -97,10 +99,12 @@ def join_room(rID,pw,Name):
     if rID not in room: #Check if room exists
         return {"out":False,"err":"Room not found"}
     if room[rID].pw is not None: #Check if room has password
-        if room[rID].pw!=pw: #Check if password is correct
+        if room[rID].pw!=enc_sha256(pw): #Check if password is correct
             return {"out":False,"err":"Password is invalid"}
 
-    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\-\_]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in user's name
+    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in user's name
+    if len(Name)!=len(re.sub(r"\s+","",Name)): return {"out":False,"err":"Name contains invalid characters"} 
+    if len(Name)>15: return {"out":False,"err":f"User's name is too long ({len(Name)}/15)"}
     Token=generate_token()
     if room[rID].users:
         for id,us in room[rID].users.items():
@@ -135,7 +139,7 @@ def get_users(rID,pw):
         return {"out":False,"err":"Room not found"}
 
     if room[rID].pw is not None: #Check if the room has a password.
-        if room[rID].pw!=pw: #Check if the password is correct.
+        if room[rID].pw!=enc_sha256(pw): #Check if the password is correct.
             return {"out":False,"err":"Invalid Password"}
     
     if not room[rID].users: #Check if room has any users.
@@ -152,7 +156,7 @@ def post_msg(rID,pw,token,msg):
     if rID not in room: #Check if room exists.
         return {"out":False,"err":"Room not found"}
     if room[rID].pw is not None:    #Check if room has a password
-        if room[rID]!=pw:   #Check if the password is correct
+        if room[rID]!=enc_sha256(pw):   #Check if the password is correct
             return {"out":False,"err":"Invalid Password"}
     
     return room[rID].newMsg(token,msg)
@@ -161,13 +165,18 @@ def get_msg(rID,pw,token):
     if rID not in room: #Check if room exists.
         return {"out":False,"err":"Room not found"}
     if room[rID].pw is not None:    #Check if room has a password
-        if room[rID]!=pw:   #Check if the password is correct
+        if room[rID]!=enc_sha256(pw):   #Check if the password is correct
             return {"out":False,"err":"Invalid Password"}
     
     return room[rID].getMsg(token)
 
 ###  OTHER
 def generate_token():
-    print("gen token")
     rd.seed()
-    return b64.b64("enc",str(rd.randint(100000,10000000)))
+    return enc_sha256(b64.b64("enc",str(rd.randint(100000,10000000))))
+
+#https://medium.com/@dwernychukjosh/sha256-encryption-with-python-bf216db497f9
+def enc_sha256(hash_string):
+    sha_signature = \
+        hlib.sha256(hash_string.encode()).hexdigest()
+    return sha_signature
