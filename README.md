@@ -3,10 +3,10 @@ Chatroom software programmed in Python 3 with FastAPI and Tkinter.
 
 Server runs on Uvicorn.
 
-## You'll need to have Uvicorn, FastAPI, Requests and Python 3 installed to run this.
+## You'll need to have Uvicorn, FastAPI and Requests installed to run this.
 To install Uvicorn, FastAPI and Requests run `pip install uvicorn`, `pip install fastapi` and `pip install requests` on command prompt/terminal.
 
-### Installing Python 3
+### Installing Python 3 (if you haven't already)
 On Windows and Mac head over to [Python's own site](https://www.python.org/downloads/)
 
 On Linux open terminal and run `sudo apt-get install Python3`
