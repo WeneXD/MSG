@@ -330,6 +330,7 @@ class Room(tk.Frame):
             self.msg_box.delete('1.0',tk.END)
             for x in meow:
                 self.msg_box.insert(tk.END,x)
+            self.msg_box.see(tk.END)
             self.msg_box.config(state=tk.DISABLED)
             
     def auto_refresh(self):
