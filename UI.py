@@ -265,7 +265,11 @@ class Room(tk.Frame):
             resp=req.post(addr+f"/leave_room/?roomID={self.cont.roomID}&token={self.cont.token}")
             resp.raise_for_status()
         except (req.exceptions.ConnectionError, req.exceptions.Timeout):    #Server timed out/Server down
-            self.alert_label.config(text="Error: Timed out/Server down")
+            self.cont.frames['Roomlist'].alert_label.config(text="Error: Timed out/Server down")
+            self.auto_refresh_deactivate()
+            self.cont.frames['Roomlist'].refresh_list()
+            self.cont.token=""
+            self.cont.show_frame("Roomlist")
             return
         except req.exceptions.HTTPError:    #False request
             self.alert_label.config(text="Error: HTTP Error")
@@ -273,10 +277,8 @@ class Room(tk.Frame):
         else:   #Got an answer from the server.
             meow=resp.json()
             if 'err' in meow:
-                self.alert_label.config(text=f"Error: {meow['err']}")
-                return
+                self.cont.frames['Roomlist'].alert_label.config(text=f"Error: {meow['err']}")
             self.auto_refresh_deactivate()
-            self.cont.title("MSG")
             self.cont.frames['Roomlist'].refresh_list()
             self.cont.token=""
             self.cont.show_frame("Roomlist")
@@ -325,6 +327,12 @@ class Room(tk.Frame):
             meow=resp.json()
             if 'err' in meow:
                 self.alert_label.config(text=f"Error: {meow['err']}")
+                if meow['err']=="Room not found":
+                    self.auto_refresh_deactivate()
+                    self.cont.frames['Roomlist'].alert_label.config(text=f"Error: {meow['err']}")
+                    self.cont.frames['Roomlist'].refresh_list()
+                    self.cont.token=""
+                    self.cont.show_frame("Roomlist")
                 return
             self.msg_box.config(state=tk.NORMAL)
             self.msg_box.delete('1.0',tk.END)
@@ -421,6 +429,11 @@ class Room_Users(tk.Frame):
             self.UserList.delete(0,tk.END)
             if 'err' in meow:
                 self.alert_label.config(text=f"Error: {meow['err']}")
+                if meow['err']=="Room not found":
+                    self.cont.frames['Roomlist'].alert_label.config(text=f"Error: {meow['err']}")
+                    self.cont.frames['Roomlist'].refresh_list()
+                    self.cont.token=""
+                    self.cont.show_frame("Roomlist")
                 return
             for user in meow:
                 self.UserList.insert(tk.END,user)
@@ -448,6 +461,11 @@ class Room_Users(tk.Frame):
             meow = resp.json()
             if 'err' in meow:
                 self.alert_label.config(text=f"Error: {meow['err']}")
+                if meow['err']=="Room not found":
+                    self.cont.frames['Roomlist'].alert_label.config(text=f"Error: {meow['err']}")
+                    self.cont.frames['Roomlist'].refresh_list()
+                    self.cont.token=""
+                    self.cont.show_frame("Roomlist")
                 return
             self.userName.config(text=f"Name: {meow['name']}")
             self.UserMSGs.config(text=f"Messages: {meow['msgs']}")
