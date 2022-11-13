@@ -3,6 +3,7 @@ import re
 import random as rd
 import base64
 import hashlib as hlib
+import time as t
 rd.seed()
 
 room={}
@@ -11,17 +12,21 @@ room={}
 class User(BaseModel):
     name:str
     token:str
-    msgs:int
+    msgs:int=0
+    lastActivity:float=t.time()
 
 class Room(BaseModel):
     class Msg(BaseModel):
         name:str
         text:str
+        time:str
     
-    name:str
+    name:str=""
     pw:str | None=None
     msgs:list[Msg]
+    msgTime:float=t.time()
     users:dict[str,User]
+    time:float=t.time()
 
     def newMsg(self,token,Msg):
         userInRoom=False
@@ -33,13 +38,22 @@ class Room(BaseModel):
             if us.token==token:
                 userInRoom=True
                 Name=us.name
+                us.lastActivity=t.time()
+                us.msgs+=1
         
         if not userInRoom:
             return {"out":False,"err":"User not in room"}
         
-        newMSG=self.Msg(name=Name,text=Msg)
-        if len(self.msgs)>=31:
-            del self.msgs[1]
+        self.msgTime=t.time()
+        mins=(self.msgTime-self.time)/60
+        hours=0
+        while mins>59:
+            hours+=1
+            mins-=60
+
+        newMSG=self.Msg(name=Name,text=Msg,time=f"{int(hours)}:{int(mins)}")
+        if len(self.msgs)>=10:
+            del self.msgs[0]
         self.msgs.append(newMSG)
         return {"out":True}
 
@@ -56,8 +70,14 @@ class Room(BaseModel):
         if not self.msgs:
             meow.append("\tNo messages, try sending one.")
         for msg in self.msgs:
-            meow.append(f"\t[{msg.name}]\n"+msg.text)
+            meow.append(f"\t{msg.name} [{msg.time}]\n{msg.text}\n")
         return meow
+
+    def getUserInfo(self,uID):
+        if str(uID) not in self.users: #Check if an user with the ID exists in the room.
+            return {"out":False,"err":"User not found"}
+        return {"name":self.users[uID].name, "msgs":self.users[uID].msgs, "lastActivity":int((t.time()-self.users[uID].lastActivity)/60)}
+        
 
 ###  ROOMS
 def get_rooms():
@@ -72,10 +92,20 @@ def get_rooms():
         meow[len(meow)+1]=[id,rm.name,hasPw] #Fill dict with rooms
     return meow
 
-def make_room(Name,Pw):
+def make_room(Name,Username,Pw):
     cnt=1
-    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in room name
-    if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/30)"}
+    print(Name)
+    print(Username)
+
+    if len(Name)==0: return {"out":False,"err":"Room name missing"}
+    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å\:\;\^]","",Name)): return {"out":False,"err":"Room name contains invalid characters"}       #Check for illegal symbols in room name
+    if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/25)"}
+
+    if len(Username)==0: return {"out":False,"err":"Username missing"}
+    if len(Username)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å\:\;]","",Username)): return {"out":False,"err":"Username contains invalid characters"}       #Check for illegal symbols in user's name
+    if len(Username)!=len(re.sub(r"\s+","",Username)): return {"out":False,"err":"Username contains invalid characters"} 
+    if len(Username)>15: return {"out":False,"err":f"Username is too long ({len(Username)}/15)"}
+
     if Pw is not None:
         if len(Pw)!=len(re.sub(r"[^a-zA-Z0-9\-\_\.]","",Pw)): return {"out":False,"err":"Pass contains invalid characters"} #Check for illegal symbols in room password
         Pw=enc_sha256(Pw) #Sha256 Encode the password
@@ -87,7 +117,10 @@ def make_room(Name,Pw):
 
     newRoom=Room(name=Name,pw=Pw,users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
     room[str(cnt)]=newRoom #Add newRoom to the room dict.
-    return {"out":True,"roomID":cnt,"name":Name} #Return a positive outcome, roomID, room name.
+    Token=generate_token()
+    newUser=User(name=Username,token=Token)
+    room[str(cnt)].users["1"]=newUser
+    return {"out":True,"roomID":cnt,"name":Name,"userID":"1","token":Token} #Return a positive outcome, roomID, room name.
 
 def delete_room(rID):
     if rID in room: #Check if room exists
@@ -103,19 +136,20 @@ def join_room(rID,pw,Name):
         if room[rID].pw!=enc_sha256(pw): #Check if password is correct
             return {"out":False,"err":"Password is invalid"}
 
+    if len(Name)==0: return {"out":False,"err":"Name missing"}
     if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in user's name
     if len(Name)!=len(re.sub(r"\s+","",Name)): return {"out":False,"err":"Name contains invalid characters"} 
     if len(Name)>15: return {"out":False,"err":f"User's name is too long ({len(Name)}/15)"}
     Token=generate_token()
     if room[rID].users:
         for id,us in room[rID].users.items():
-            if int(id)==cnt:cnt+=1 #If user with count ID exists increase count's value.
+            if int(id)==cnt: cnt+=1 #If user with count ID exists increase count's value.
             if us.token==Token:
                 Token=generate_token()
             if us.name==Name: #Also check if a user with the same name already exists.
                 return {"out":False,"err":"User with the name already exists"}
     
-    newUser=User(name=Name, token=Token, msgs=0) #Makes a new variable named newUser which contain the new user.
+    newUser=User(name=Name, token=Token) #Makes a new variable named newUser which contain the new user.
     room[rID].users[str(cnt)]=newUser #Add newUser to the users dict.
     return {"out":True,"userID":str(cnt),"token":Token}
 
@@ -152,12 +186,21 @@ def get_users(rID,pw):
 
     return meow
 
+def get_userinfo(rID,uID,pw):
+    if rID not in room: #Check if room exists
+        return {"out":False,"err":"Room not found"}
+    if room[rID].pw is not None: #Check if room has password
+        if room[rID].pw!=enc_sha256(pw): #Check if password is correct
+            return {"out":False,"err":"Password is invalid"}
+    
+    return room[rID].getUserInfo(uID)
+
 ###  MESSAGING
 def post_msg(rID,pw,token,msg):
     if rID not in room: #Check if room exists.
         return {"out":False,"err":"Room not found"}
     if room[rID].pw is not None:    #Check if room has a password
-        if room[rID]!=enc_sha256(pw):   #Check if the password is correct
+        if room[rID].pw!=enc_sha256(pw):   #Check if the password is correct
             return {"out":False,"err":"Invalid Password"}
     
     return room[rID].newMsg(token,msg)
@@ -166,7 +209,9 @@ def get_msg(rID,pw,token):
     if rID not in room: #Check if room exists.
         return {"out":False,"err":"Room not found"}
     if room[rID].pw is not None:    #Check if room has a password
-        if room[rID]!=enc_sha256(pw):   #Check if the password is correct
+        if pw is None:
+            return {"out":False,"err":"Room requires a password"}
+        if room[rID].pw!=enc_sha256(pw):   #Check if the password is correct
             return {"out":False,"err":"Invalid Password"}
     
     return room[rID].getMsg(token)
