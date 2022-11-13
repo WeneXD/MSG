@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import threading as th
 import room as r
 
 app = FastAPI()
@@ -46,5 +47,7 @@ def get_msg(roomID:str, token:str, pw:str | None=None):
     return r.get_msg(roomID,pw,token)
 
 if __name__=="__main__":
+    Inactive_RoomThread=th.Thread(target=r.inactive_room)
+    Inactive_RoomThread.start()
     import uvicorn
     uvicorn.run(app,host="localhost", port=8000)
