@@ -98,7 +98,7 @@ def make_room(Name,Username,Pw):
     print(Username)
 
     if len(Name)==0: return {"out":False,"err":"Room name missing"}
-    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å\:\;\^\&]","",Name)): return {"out":False,"err":"Room name contains invalid characters"}       #Check for illegal symbols in room name
+    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å\:\;\^]","",Name)): return {"out":False,"err":"Room name contains invalid characters"}       #Check for illegal symbols in room name
     if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/25)"}
 
     if len(Username)==0: return {"out":False,"err":"Username missing"}
