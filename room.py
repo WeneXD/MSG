@@ -4,6 +4,7 @@ import random as rd
 import base64
 import hashlib as hlib
 import time as t
+
 rd.seed()
 
 room={}
@@ -77,7 +78,6 @@ class Room(BaseModel):
         if str(uID) not in self.users: #Check if an user with the ID exists in the room.
             return {"out":False,"err":"User not found"}
         return {"name":self.users[uID].name, "msgs":self.users[uID].msgs, "lastActivity":int((t.time()-self.users[uID].lastActivity)/60)}
-        
 
 ###  ROOMS
 def get_rooms():
@@ -115,7 +115,7 @@ def make_room(Name,Username,Pw):
             if rm.name==Name: #Also check if a room with the same name already exists.
                 return {"out":False,"err":"Room with the name already exists"}
 
-    newRoom=Room(name=Name,pw=Pw,users=[],msgs=[]) #Makes a new variable named newRoom which contains the new room.
+    newRoom=Room(name=Name,pw=Pw,users=[],msgs=[],msgTime=t.time()) #Makes a new variable named newRoom which contains the new room.
     room[str(cnt)]=newRoom #Add newRoom to the room dict.
     Token=generate_token()
     newUser=User(name=Username,token=Token)
@@ -224,6 +224,23 @@ def generate_token():
 def b64(x,y):
     if x=="enc": mBytes=y.encode("ascii"); b64Bytes=base64.b64encode(mBytes); return b64Bytes.decode("ascii")
     elif x=="dec": b64Bytes=y.encode("ascii"); mBytes=base64.b64decode(b64Bytes); return mBytes.decode("ascii")
+
+def inactive_room():
+    while True:
+        t.sleep(30)
+        if room:
+            delList=[]
+            print("\tScanning for inactive rooms")
+            for id,rm in room.items():
+                if int(t.time()-rm.msgTime)/60>30:
+                    print(f"\troomID:{id} | Name: {rm.name} added to DeleteList")
+                    delList.append(id)
+            print("\tScan done")
+            for x in delList:
+                print(f"\tRoom [{room[x].name}] deleted")
+                delete_room(x)
+            print(f"\tDeleted {len(delList)} room(s)")
+
 
 #https://medium.com/@dwernychukjosh/sha256-encryption-with-python-bf216db497f9
 def enc_sha256(hash_string):
