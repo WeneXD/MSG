@@ -294,7 +294,7 @@ class Room(tk.Frame):
                 resp=req.post(addr+f"/post_msg/?roomID={self.cont.roomID}&token={self.cont.token}&msg={msg}&pw={self.cont.roomPW}")
             resp.raise_for_status()
         except (req.exceptions.ConnectionError, req.exceptions.Timeout):    #Server timed out/Server down  
-            self.controller.title(f"MSG | Room: {self.cont.roomName} (Timed out/Server down)")
+            self.cont.title(f"MSG | Room: {self.cont.roomName} (Timed out/Server down)")
             self.alert_label.config(text="Error: Timed out/Server down")
             return
         except req.exceptions.HTTPError:    #False request
