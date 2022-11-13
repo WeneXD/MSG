@@ -17,8 +17,8 @@ def get_rooms():
 #   return r.delete_room(roomID)
 
 @app.post("/make_room/")
-def make_room(name:str, pw:str | None=None):
-    meow=r.make_room(name,pw)
+def make_room(name:str, username:str, pw:str | None=None):
+    meow=r.make_room(name,username,pw)
     return meow
 
 @app.post("/join_room/")
@@ -32,6 +32,10 @@ def leave_room(roomID:str,token:str):
 @app.get("/get_users/")
 def get_users(roomID:str,pw:str | None=None):
     return r.get_users(roomID,pw)
+
+@app.get("/get_userinfo/")
+def get_userinfo(roomID:str,userID:str,pw:str | None=None):
+    return r.get_userinfo(roomID,userID,pw)
 
 @app.post("/post_msg/")
 def post_msg(roomID:str, token:str, msg:str, pw:str | None=None):
