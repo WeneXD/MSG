@@ -16,7 +16,6 @@ class mainFrame(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.title("MSG")
-        self.wm_attributes("-toolwindow",'True')
         self.geometry("512x384")
         self.minsize(512,384)
         self.maxsize(512,384)
