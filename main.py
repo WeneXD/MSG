@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 import threading as th
 import room as r
+from pydantic import BaseSettings
 
-app = FastAPI()
+class Settings(BaseSettings):
+    openapi_url:str="" #Change the string from "" to "/openapi.json" if you want to re-enable the docs.
+
+settings=Settings()
+app=FastAPI(openapi_url=settings.openapi_url)
 
 @app.get("/")
 def read_root():
@@ -50,4 +55,4 @@ if __name__=="__main__":
     Inactive_RoomThread=th.Thread(target=r.inactive_room)
     Inactive_RoomThread.start()
     import uvicorn
-    uvicorn.run(app,host="localhost", port=8000)
+    uvicorn.run(app,host="25.0.207.60", port=8000)
