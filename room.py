@@ -144,6 +144,7 @@ def join_room(rID,pw,Name):
     if room[rID].users:
         for id,us in room[rID].users.items():
             if int(id)==cnt: cnt+=1 #If user with count ID exists increase count's value.
+            if str(cnt) in room[rID].users: cnt+=1
             if us.token==Token:
                 Token=generate_token()
             if us.name==Name: #Also check if a user with the same name already exists.
