@@ -7,7 +7,7 @@ import threading as th
 #https://stackoverflow.com/a/7557028
 #Used as a template
 
-ip="localhost"
+ip="192.168.45.107"
 port="8000"
 addr=f'http://{ip}:{port}'
 
@@ -475,8 +475,10 @@ class Room_Users(tk.Frame):
                 self.UserLastActive.config(text=f"Last Active: {meow['lastActivity']} min(s) ago")
 
     def Return(self):
+        self.cont.title(f"MSG | Room [{self.cont.roomName}]")
         self.cont.frames['Room'].auto_refresh_activate()
         self.cont.show_frame('Room')
+
 
 if __name__=="__main__":
     app=mainFrame()
