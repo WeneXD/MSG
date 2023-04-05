@@ -55,4 +55,4 @@ if __name__=="__main__":
     Inactive_RoomThread=th.Thread(target=r.inactive_room)
     Inactive_RoomThread.start()
     import uvicorn
-    uvicorn.run(app,host="25.0.207.60", port=8000)
+    uvicorn.run(app,host="localhost", port=8000)
