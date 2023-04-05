@@ -1,29 +1,32 @@
 # MSG
-Chatroom software programmed in Python 3 with FastAPI and Tkinter.
+Chatroom software programmed in Python 3 using Uvicorn, FastAPI and Tkinter.
 
-Server runs on Uvicorn.
+### Requirements
+[Python3](https://www.python.org/downloads/)
 
-## You'll need to have Uvicorn, FastAPI and Requests installed to run this.
-To install Uvicorn, FastAPI and Requests run `pip install uvicorn`, `pip install fastapi` and `pip install requests` on command prompt/terminal.
+Uvicorn `pip install uvicorn`
 
-### Installing Python 3 (if you haven't already)
-On Windows and Mac head over to [Python's own site](https://www.python.org/downloads/)
+FastAPI `pip install fastapi`
 
-On Linux open terminal and run `sudo apt-get install Python3`
+Requests `pip install requests`
 
 ## Running the server
-To easily test the server out just run the `_server.bat`
+To start the server run `_server.bat`
 
-Then after starting the server, run `_client.bat`
+After that run `_client.bat`
 
 ## Changing the IP Address and Port
 To change the IP Address and Port you need to open both `UI.py` and `main.py`.
 
 ### `UI.py`
-At the top you'll see 2 strings containing both the IP and the port. Those are the variables you'll need to change.
+At the top you'll see 2 strings containing both the IP and the port.
 
 ### `main.py`
-At the bottom you'll see _uvicorn.run(app,host="localhost",port=8000)_ in which you'll want to change the host and port variables.
+At the bottom you'll see `uvicorn.run(app,host="localhost",port=8000)`. Host is the IP address and the port is self-explanatory.
+
+Change the host from `localhost` to `0.0.0.0` to allow outside (LAN/WAN) clients to connect.
+
+## 
 
 ## That's all
 You should now be all set to use my fun little project in anyway you'd like.
