@@ -25,8 +25,3 @@ At the top you'll see 2 strings containing both the IP and the port.
 At the bottom you'll see `uvicorn.run(app,host="localhost",port=8000)`. Host is the IP address and the port is self-explanatory.
 
 Change the host from `localhost` to `0.0.0.0` to allow outside (LAN/WAN) clients to connect.
-
-## 
-
-## That's all
-You should now be all set to use my fun little project in anyway you'd like.
