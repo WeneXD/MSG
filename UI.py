@@ -3,14 +3,18 @@ from tkinter import font
 import requests as req
 import time as t
 import threading as th
+import base64
 
 #https://stackoverflow.com/a/7557028
 #Used as a template
 
-ip="192.168.45.107"
+ip="127.0.0.1"
 port="8000"
 addr=f'http://{ip}:{port}'
 
+def b64(x,y):
+    if x=="enc": mBytes=y.encode("utf-8"); b64Bytes=base64.b64encode(mBytes); return b64Bytes.decode("utf-8")
+    elif x=="dec": b64Bytes=y.encode("utf-8"); mBytes=base64.b64decode(b64Bytes); return mBytes.decode("utf-8")
 
 class mainFrame(tk.Tk):
     def __init__(self):
@@ -284,7 +288,7 @@ class Room(tk.Frame):
             self.cont.show_frame("Roomlist")
 
     def msg_send(self):
-        msg=self.msg_entry.get()
+        msg=b64("enc",self.msg_entry.get())
         if len(msg)==0:
             self.alert_label.config(text="Error: Cannot send empty message.")
             return
@@ -478,6 +482,7 @@ class Room_Users(tk.Frame):
         self.cont.title(f"MSG | Room [{self.cont.roomName}]")
         self.cont.frames['Room'].auto_refresh_activate()
         self.cont.show_frame('Room')
+
 
 
 if __name__=="__main__":
