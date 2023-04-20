@@ -52,7 +52,7 @@ class Room(BaseModel):
             hours+=1
             mins-=60
 
-        newMSG=self.Msg(name=Name,text=Msg,time=f"{int(hours)}:{int(mins)}")
+        newMSG=self.Msg(name=Name,text=b64("dec",Msg),time=f"{int(hours)}:{int(mins)}")
         if len(self.msgs)>=10:
             del self.msgs[0]
         self.msgs.append(newMSG)
@@ -223,8 +223,8 @@ def generate_token():
     return enc_sha256(b64("enc",str(rd.randint(100000,10000000))))
 
 def b64(x,y):
-    if x=="enc": mBytes=y.encode("ascii"); b64Bytes=base64.b64encode(mBytes); return b64Bytes.decode("ascii")
-    elif x=="dec": b64Bytes=y.encode("ascii"); mBytes=base64.b64decode(b64Bytes); return mBytes.decode("ascii")
+    if x=="enc": mBytes=y.encode("utf-8"); b64Bytes=base64.b64encode(mBytes); return b64Bytes.decode("utf-8")
+    elif x=="dec": b64Bytes=y.encode("utf-8"); mBytes=base64.b64decode(b64Bytes); return mBytes.decode("utf-8")
 
 def inactive_room():
     while True:
