@@ -5,6 +5,8 @@ import time as t
 import threading as th
 import base64
 
+print("https://github.com/WeneXD/MSG")
+
 #https://stackoverflow.com/a/7557028
 #Used as a template
 
