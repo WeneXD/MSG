@@ -231,7 +231,7 @@ def inactive_room():
         t.sleep(30)
         if room:
             delList=[]
-            print("\tScanning for inactive rooms")
+            print("\n\tScanning for inactive rooms")
             for id,rm in room.items():
                 if int(t.time()-rm.msgTime)/60>30:
                     print(f"\troomID:{id} | Name: {rm.name} added to DeleteList")
