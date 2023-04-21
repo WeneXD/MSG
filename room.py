@@ -94,8 +94,6 @@ def get_rooms():
 
 def make_room(Name,Username,Pw):
     cnt=1
-    print(Name)
-    print(Username)
 
     if len(Name)==0: return {"out":False,"err":"Room name missing"}
     if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å\:\;\^]","",Name)): return {"out":False,"err":"Room name contains invalid characters"}       #Check for illegal symbols in room name
