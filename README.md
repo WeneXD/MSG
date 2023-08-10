@@ -24,4 +24,4 @@ At the top you'll see 2 strings containing both the IP and the port.
 ### `main.py`
 At the bottom you'll see `uvicorn.run(app,host="localhost",port=8000)`. Host is the IP address and the port is self-explanatory.
 
-Change the host from `localhost` to `0.0.0.0` to allow outside (LAN/WAN) clients to connect.
+Change the host from `localhost` (LAN) to `0.0.0.0` (WAN) to allow outside clients to connect.
