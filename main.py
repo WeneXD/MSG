@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 import threading as th
 import room as r
-from pydantic import BaseSettings
 
-class Settings(BaseSettings):
+class Settings:
     openapi_url:str="" #Change the string from "" to "/openapi.json" if you want to re-enable the docs.
 
-settings=Settings()
-app=FastAPI(openapi_url=settings.openapi_url)
+app=FastAPI(openapi_url=Settings.openapi_url)
 
 @app.get("/")
 def read_root():
