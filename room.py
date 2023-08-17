@@ -113,7 +113,7 @@ def make_room(Name,Username,Pw):
             if rm.name==Name: #Also check if a room with the same name already exists.
                 return {"out":False,"err":"Room with the name already exists"}
 
-    newRoom=Room(name=Name,pw=Pw,users=[],msgs=[],msgTime=t.time()) #Makes a new variable named newRoom which contains the new room.
+    newRoom=Room(name=Name,pw=Pw,users={},msgs=[],msgTime=t.time()) #Makes a new variable named newRoom which contains the new room.
     room[str(cnt)]=newRoom #Add newRoom to the room dict.
     Token=generate_token()
     newUser=User(name=Username,token=Token)
