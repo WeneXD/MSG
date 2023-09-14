@@ -99,10 +99,8 @@ def make_room(Name,Username,Pw):
     if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\ \-\_\ä\ö\å\:\;\^]","",Name)): return {"out":False,"err":"Room name contains invalid characters"}       #Check for illegal symbols in room name
     if len(Name)>30: return {"out":False,"err":f"Room's name is too long ({len(Name)}/25)"}
 
-    if len(Username)==0: return {"out":False,"err":"Username missing"}
-    if len(Username)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å\:\;]","",Username)): return {"out":False,"err":"Username contains invalid characters"}       #Check for illegal symbols in user's name
-    if len(Username)!=len(re.sub(r"\s+","",Username)): return {"out":False,"err":"Username contains invalid characters"} 
-    if len(Username)>15: return {"out":False,"err":f"Username is too long ({len(Username)}/15)"}
+    meow=check_username(Username)
+    if not meow["out"]: return meow
 
     if Pw is not None:
         if len(Pw)!=len(re.sub(r"[^a-zA-Z0-9\-\_\.]","",Pw)): return {"out":False,"err":"Pass contains invalid characters"} #Check for illegal symbols in room password
@@ -134,10 +132,9 @@ def join_room(rID,pw,Name):
         if room[rID].pw!=enc_sha256(pw): #Check if password is correct
             return {"out":False,"err":"Password is invalid"}
 
-    if len(Name)==0: return {"out":False,"err":"Name missing"}
-    if len(Name)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å]","",Name)): return {"out":False,"err":"Name contains invalid characters"}       #Check for illegal symbols in user's name
-    if len(Name)!=len(re.sub(r"\s+","",Name)): return {"out":False,"err":"Name contains invalid characters"} 
-    if len(Name)>15: return {"out":False,"err":f"User's name is too long ({len(Name)}/15)"}
+    meow=check_username(Name)
+    if not meow["out"]: return meow
+    
     Token=generate_token()
     if room[rID].users:
         for id,us in room[rID].users.items():
@@ -193,6 +190,13 @@ def get_userinfo(rID,uID,pw):
             return {"out":False,"err":"Password is invalid"}
     
     return room[rID].getUserInfo(uID)
+
+def check_username(Username):
+    if len(Username)==0: return {"out":False,"err":"Username missing"}
+    if len(Username)!=len(re.sub(r"[^a-zA-Z0-9\-\_\ä\ö\å\:\;]","",Username)): return {"out":False,"err":"Username contains invalid characters"}       #Check for illegal symbols in user's name
+    if len(Username)!=len(re.sub(r"\s+","",Username)): return {"out":False,"err":"Username contains invalid characters"} 
+    if len(Username)>15: return {"out":False,"err":f"Username is too long ({len(Username)}/15)"}
+    return {"out":True}
 
 ###  MESSAGING
 def post_msg(rID,pw,token,msg):
